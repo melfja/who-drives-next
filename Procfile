@@ -1,1 +1,2 @@
-web: build/install/who-drives-next/bin/who-drives-next
+web: java $JAVA_OPTS -jar target/*.jar
+
