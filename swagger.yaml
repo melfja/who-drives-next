@@ -1,0 +1,369 @@
+# this is who-drives-next, based on an example of the Uber API
+swagger: '2.0'
+info:
+  title: Who drives Next?
+  description: Your API for managing your carpool.
+  version: "0.1.0"
+# the domain of the service
+host: api.wdn.binares.de
+# array of all schemes that your API supports
+schemes:
+  - https
+# will be prefixed to all paths
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /carpools:
+    post:
+      summary: create a carpool - a group of people who want to drive together
+      description: |
+        You can create a new carpool and add drivers or passengers.
+        Rides can be associated to a carpool and statistics are offered.
+      parameters:
+        - name: carpool
+          in: body
+          description: carpool object
+          required: true
+          schema:
+            $ref: "#/definitions/carpool"
+      tags:
+        - carpool
+      responses:
+        200:
+          description: the created carpool
+          schema:
+            $ref: '#/definitions/carpool'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/error'
+    get:
+      summary: carpool - a group of people who want to drive together
+      description: |
+        tbd.
+      parameters:
+        - name: name
+          in: query
+          description: Name of the Car pool
+          required: true
+          type: string
+      tags:
+        - carpool
+      responses:
+        200:
+          description: the created carpool
+          schema:
+            $ref: '#/definitions/carpool'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/error'
+  /carpools/{carpoolId}/rides:
+    post:
+      summary: create a ride - a group of people driving together
+      description: |
+        rides can only be added to existing carpools and can be added by any member of the carpool.
+      parameters:
+        - name: carpoolId
+          description: unique ID of the carpool you want to add a ride to
+          in: path
+          type: string
+          required: true
+        - name: ride
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ride'
+      tags:
+        - carpool
+      responses:
+        200:
+          description: the created carpool
+          schema:
+              $ref: '#/definitions/ride'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/error'
+    get:
+      summary: search for rides
+      description: |
+        show the history or search for rides for a carpool.
+      parameters:
+        - name: carpoolId
+          description: unique ID of the carpool you want to search rides from
+          in: path
+          type: string
+          required: true
+        - name: from
+          in: query
+          description: |
+            search rides since or at that from-date.
+
+            date in ??? format
+          required: false
+          type: string
+        - name: to
+          in: query
+          description: |
+            search rides before or at that to-date.
+
+            date in ??? format
+          required: false
+          type: string
+        - name: lastDays
+          in: query
+          description: |
+            search rides in the last number of days from now.
+
+            may give unexpected results if you combine this with from/to query parameters.
+          required: false
+          type: number
+        - name: offset
+          in: query
+          type: integer
+          format: int32
+          description: Offset the list of returned results by this amount. Default is zero.
+        - name: limit
+          in: query
+          type: integer
+          format: int32
+          description: Number of items to retrieve. Default is 5, maximum is 100.
+      tags:
+        - carpool
+      responses:
+        200:
+          description: the created carpool
+          schema:
+              $ref: '#/definitions/carpool'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/error'
+  /carpools/{carpoolId}/rides/{rideId}/driver:
+    put:
+      summary: set a driver to a ride
+      description: |
+        one driver can be set to a existing ride. If allredy a driver has been set it will be replaced.
+
+        the driver must be one of the members of the carpool.
+      parameters:
+        - name: carpoolId
+          description: unique ID of the carpool the ride belongs to
+          in: path
+          type: string
+          required: true
+        - name: rideId
+          description: unique ID of the ride you want to set the driver to
+          in: path
+          type: string
+          required: true
+        - name: driver
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/member"
+      tags:
+        - carpool
+      responses:
+        200:
+          description: the updated ride
+          schema:
+              $ref: '#/definitions/ride'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/error'
+  /carpools/{carpoolId}/rides/{rideId}/passengers:
+    post:
+      summary: add a passenger a ride
+      description: |
+        one driver can be set to a existing ride. If allredy a driver has been set it will be replaced.
+
+        the driver must be one of the members of the carpool.
+      parameters:
+        - name: carpoolId
+          description: unique ID of the carpool the ride belongs to
+          in: path
+          type: string
+          required: true
+        - name: rideId
+          description: unique ID of the ride you want to set the passenger to
+          in: path
+          type: string
+          required: true
+        - name: passenger
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/member"
+      tags:
+        - carpool
+      responses:
+        200:
+          description: the updated ride
+          schema:
+              $ref: '#/definitions/ride'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/error'
+  /me:
+    get:
+      summary: User Profile
+      description: The User Profile endpoint returns information about the who-drives-next user that has authorized with the application.
+      tags:
+        - User
+      responses:
+        200:
+          description: Profile information for a user
+          schema:
+            $ref: '#/definitions/profile'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/error'
+  /history:
+    get:
+      summary: User Activity
+      description: The User Activity endpoint returns data about a user's lifetime activity with Uber. The response will include pickup locations and times, dropoff locations and times, the distance of past requests, and information about which products were requested.<br><br>The history array in the response will have a maximum length based on the limit parameter. The response value count may exceed limit, therefore subsequent API requests may be necessary.
+      parameters:
+        - name: offset
+          in: query
+          type: integer
+          format: int32
+          description: Offset the list of returned results by this amount. Default is zero.
+        - name: limit
+          in: query
+          type: integer
+          format: int32
+          description: Number of items to retrieve. Default is 5, maximum is 100.
+      tags:
+        - User
+      responses:
+        200:
+          description: History information for the given user
+          schema:
+            $ref: '#/definitions/Activities'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/error'
+definitions:
+  carpool:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier representing a carpool.
+      name:
+        type: string
+        description: Name of the carpool.
+      display_name:
+        type: string
+        description: Display name of carpool.
+      capacity:
+        type: string
+        description: Capacity of carpool. For example, 4 people.
+      image:
+        type: string
+        description: Image URL representing the carpool.
+  ride:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier representing a ríde.
+      date:
+        type: string
+        description: Date of the ride.
+      driver:
+        $ref: '#/definitions/driver'
+      passengers:
+        type: array
+        items:
+          $ref: '#/definitions/passenger'
+  passenger:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier representing a ríde.
+      date:
+        type: string
+        description: Date of the ride.
+  driver:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier representing a ríde.
+      date:
+        type: string
+        description: Date of the ride.
+  member:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier representing a member.
+      profileId:
+        type: string
+        description: Unique identifier of the profile of the member.
+      nickname:
+        type: string
+        description: Nickname of Name-Summary of the member.
+  profile:
+    type: object
+    properties:
+      first_name:
+        type: string
+        description: First name of the user.
+      last_name:
+        type: string
+        description: Last name of the user.
+      email:
+        type: string
+        description: Email address of the user
+      picture:
+        type: string
+        description: Image URL of the user.
+      promo_code:
+        type: string
+        description: Promo code of the user.
+  Activity:
+    type: object
+    properties:
+      uuid:
+        type: string
+        description: Unique identifier for the activity
+  Activities:
+    type: object
+    properties:
+      offset:
+        type: integer
+        format: int32
+        description: Position in pagination.
+      limit:
+        type: integer
+        format: int32
+        description: Number of items to retrieve (100 max).
+      count:
+        type: integer
+        format: int32
+        description: Total number of items available.
+      history:
+        type: array
+        items:
+          $ref: '#/definitions/Activity'
+  error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
