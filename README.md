@@ -1,5 +1,5 @@
 # who-drives-next
-Who drives next? Your Carl Pool Manager.
+Who drives next? Your Carpool Manager.
 
 "Who-drives-next" is a fun project to utilize daily boring driving time to work. Besides creating an sexy and helpful application it's mainly about playing around with
 • latest technologies

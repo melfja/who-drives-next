@@ -1,1 +1,1 @@
-web:    java -jar target/who-drives-next.jar
+web: java $JAVA_OPTS -Dserver.port=$PORT -jar build/libs/*.jar
