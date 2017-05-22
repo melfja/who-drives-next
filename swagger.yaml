@@ -59,17 +59,12 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/error'
-  /carpools/{carpoolId}/rides:
+  /rides:
     post:
       summary: create a ride - a group of people driving together
       description: |
         rides can only be added to existing carpools and can be added by any member of the carpool.
       parameters:
-        - name: carpoolId
-          description: unique ID of the carpool you want to add a ride to
-          in: path
-          type: string
-          required: true
         - name: ride
           in: body
           required: true
@@ -89,13 +84,21 @@ paths:
     get:
       summary: search for rides
       description: |
-        show the history or search for rides for a carpool.
+        show the history or search for rides.
+        either an userid or a carpoolId is required.
+        rides can only be found by the driver, the passengers or any member of the associated carpool.
       parameters:
         - name: carpoolId
           description: unique ID of the carpool you want to search rides from
-          in: path
+          in: query
           type: string
-          required: true
+          required: false
+        - name: userId
+          in: query
+          description: |
+            search rides where the user was either driver or passenger.
+          required: false
+          type: string
         - name: from
           in: query
           description: |
@@ -141,7 +144,7 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/error'
-  /carpools/{carpoolId}/rides/{rideId}/driver:
+  /rides/{rideId}/driver:
     put:
       summary: set a driver to a ride
       description: |
@@ -149,11 +152,6 @@ paths:
 
         the driver must be one of the members of the carpool.
       parameters:
-        - name: carpoolId
-          description: unique ID of the carpool the ride belongs to
-          in: path
-          type: string
-          required: true
         - name: rideId
           description: unique ID of the ride you want to set the driver to
           in: path
@@ -175,19 +173,14 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/error'
-  /carpools/{carpoolId}/rides/{rideId}/passengers:
+  /rides/{rideId}/passengers:
     post:
       summary: add a passenger a ride
       description: |
-        one driver can be set to a existing ride. If allredy a driver has been set it will be replaced.
+        one driver can be set to a existing ride. If allready a driver has been set it will be replaced.
 
         the driver must be one of the members of the carpool.
       parameters:
-        - name: carpoolId
-          description: unique ID of the carpool the ride belongs to
-          in: path
-          type: string
-          required: true
         - name: rideId
           description: unique ID of the ride you want to set the passenger to
           in: path
@@ -209,6 +202,26 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/error'
+  /users:
+      get:
+        summary: User Profile
+        description: |
+          The User Profile endpoint returns information about a who-drives-next user.
+
+          The details of the response are depending on the authorisation of the user
+          * any registeres user can see the username, which can be used to identify an user before adding to a carpool.
+          * only users of a carpool can see more details of users who are assigned to the carpool
+        tags:
+          - User
+        responses:
+          200:
+            description: Profile information for a user
+            schema:
+              $ref: '#/definitions/profile'
+          default:
+            description: Unexpected error
+            schema:
+              $ref: '#/definitions/error'
   /me:
     get:
       summary: User Profile
@@ -275,6 +288,9 @@ definitions:
       id:
         type: string
         description: Unique identifier representing a ríde.
+      carpoolId:
+        type: string
+        description: a ride must belong to a carpool
       date:
         type: string
         description: Date of the ride.
