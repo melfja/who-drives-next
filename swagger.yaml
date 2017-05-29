@@ -137,9 +137,9 @@ paths:
         - carpool
       responses:
         200:
-          description: the created carpool
+          description: the rides
           schema:
-              $ref: '#/definitions/carpool'
+              $ref: '#/definitions/ridePageableList'
         default:
           description: Unexpected error
           schema:
@@ -222,6 +222,54 @@ paths:
             description: Unexpected error
             schema:
               $ref: '#/definitions/error'
+  /users/{userId}/vacations:
+    post:
+      summary: add a Off-Time to an user
+      description: |
+        tbd
+      parameters:
+        - name: userId
+          description: unique ID of the user you want to add an Off-Time to
+          in: path
+          type: string
+          required: true
+        - name: vacation
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/vacationCore"
+
+      responses:
+        200:
+          description: vacation - the newly created Off-Time
+          schema:
+            $ref: '#/definitions/vacation'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/error'
+    get:
+      summary: Off-Times of a user.
+      description: |
+        For a user a list of Off-time periods can be defined.
+        During off times users can not be added to rides.  This eases the creation of new rides.
+      tags:
+        - User
+      parameters:
+        - name: userId
+          description: unique ID of the user for whicht you search Off-Times
+          in: path
+          type: string
+          required: true
+      responses:
+        200:
+          description: List of Off-Time periods.
+          schema:
+            $ref: '#/definitions/vacationList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/error'
   /me:
     get:
       summary: User Profile
@@ -300,6 +348,25 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/passenger'
+
+  rideList:
+    type: array
+    description: List of rides
+    items:
+      $ref: "#/definitions/ride"
+
+  ridePageableList:
+    type: object
+    description: Pageable List of rides
+    properties:
+      paging:
+        $ref: "#/definitions/paging"
+      rides:
+        type: array
+        description: List of rides
+        items:
+          $ref: "#/definitions/ride"
+
   passenger:
     type: object
     properties:
@@ -330,6 +397,35 @@ definitions:
       nickname:
         type: string
         description: Nickname of Name-Summary of the member.
+# the vacation without the id
+  vacationCore:
+    type: object
+    properties:
+      fromDate:
+        type: string
+        description: First day of the Off-Time
+      toDate:
+        type: string
+        description: Last day of the Off-Time
+
+  vacation:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier representing a vacation.
+      fromDate:
+        type: string
+        description: First day of the Off-Time
+      toDate:
+        type: string
+        description: Last day of the Off-Time
+
+  vacationList:
+    type: array
+    description: List of Off-Times
+    items:
+      $ref: "#/definitions/vacation"
   profile:
     type: object
     properties:
@@ -348,12 +444,14 @@ definitions:
       promo_code:
         type: string
         description: Promo code of the user.
+
   Activity:
     type: object
     properties:
       uuid:
         type: string
         description: Unique identifier for the activity
+
   Activities:
     type: object
     properties:
@@ -373,6 +471,7 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Activity'
+
   error:
     type: object
     properties:
@@ -383,3 +482,14 @@ definitions:
         type: string
       fields:
         type: string
+
+  paging:
+    type: object
+    description: Paging-Objekt
+    properties:
+      total:
+        type: integer
+      limit:
+        type: integer
+      offset:
+        type: integer
