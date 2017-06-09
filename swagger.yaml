@@ -13,6 +13,16 @@ schemes:
 basePath: /v1
 produces:
   - application/json
+tags:
+  - name: User
+    description: Managing users and identities
+  - name: Carpool
+    description: Managing rarpools, their members and rides
+  - name: Alternative1
+    description: Version 1 how to represent rides
+  - name: Alternative2
+    description: Version 2  how to represent rides
+
 paths:
   /carpools:
     post:
@@ -59,6 +69,97 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/error'
+  /rides2:
+    post:
+      summary: create a ride - per carpool and day no or one ride
+      description: |
+        rides can only be added to existing carpools and can be added by any member of the carpool.
+
+        ALTERNATIVE:
+        zur Diskussion: statt /rides  könnte /rides2  konzept verwendet werden
+      parameters:
+        - name: ride2
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/ride2'
+      tags:
+        - carpool
+        - Alternative2
+      responses:
+        200:
+          description: the created ride
+          schema:
+              $ref: '#/definitions/ride2'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/error'
+    get:
+      summary: search for rides
+      description: |
+        show the history or search for rides.
+        either an userid or a carpoolId is required.
+        rides can only be found by the driver, the passengers or any member of the associated carpool.
+      tags:
+        - carpool
+        - Alternative2
+      parameters:
+        - name: carpoolId
+          description: unique ID of the carpool you want to search rides from
+          in: query
+          type: string
+          required: false
+        - name: userId
+          in: query
+          description: |
+            search rides where the user was either driver or passenger.
+          required: false
+          type: string
+        - name: from
+          in: query
+          description: |
+            search rides since or at that from-date.
+
+            date in ??? format
+          required: false
+          type: string
+        - name: to
+          in: query
+          description: |
+            search rides before or at that to-date.
+
+            date in ??? format
+          required: false
+          type: string
+        - name: lastDays
+          in: query
+          description: |
+            search rides in the last number of days from now.
+
+            may give unexpected results if you combine this with from/to query parameters.
+          required: false
+          type: number
+        - name: offset
+          in: query
+          type: integer
+          format: int32
+          description: Offset the list of returned results by this amount. Default is zero.
+        - name: limit
+          in: query
+          type: integer
+          format: int32
+          description: Number of items to retrieve. Default is 5, maximum is 100.
+      responses:
+        200:
+          description: the rides
+          schema:
+              $ref: '#/definitions/ride2PageableList'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/error'
+
   /rides:
     post:
       summary: create a ride - a group of people driving together
@@ -72,9 +173,10 @@ paths:
             $ref: '#/definitions/ride'
       tags:
         - carpool
+        - Alternative1
       responses:
         200:
-          description: the created carpool
+          description: the created ride
           schema:
               $ref: '#/definitions/ride'
         default:
@@ -135,6 +237,7 @@ paths:
           description: Number of items to retrieve. Default is 5, maximum is 100.
       tags:
         - carpool
+        - Alternative1
       responses:
         200:
           description: the rides
@@ -144,6 +247,30 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/error'
+
+
+  /rides/{rideId}:
+    delete:
+      summary: deletes a ride
+      description: |
+        tbd
+      parameters:
+        - name: rideId
+          description: unique ID of the ride you want to delete
+          in: path
+          type: string
+          required: true
+      tags:
+        - carpool
+        - Alternative1
+      responses:
+        200:
+          description: the ride has been deleted. Empty response.
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/error'
+
   /rides/{rideId}/driver:
     put:
       summary: set a driver to a ride
@@ -164,6 +291,7 @@ paths:
             $ref: "#/definitions/member"
       tags:
         - carpool
+        - Alternative1
       responses:
         200:
           description: the updated ride
@@ -193,6 +321,7 @@ paths:
             $ref: "#/definitions/member"
       tags:
         - carpool
+        - Alternative1
       responses:
         200:
           description: the updated ride
@@ -227,6 +356,9 @@ paths:
       summary: add a Off-Time to an user
       description: |
         tbd
+      tags:
+        - User
+        - Alternative1
       parameters:
         - name: userId
           description: unique ID of the user you want to add an Off-Time to
@@ -255,6 +387,7 @@ paths:
         During off times users can not be added to rides.  This eases the creation of new rides.
       tags:
         - User
+        - Alternative1
       parameters:
         - name: userId
           description: unique ID of the user for whicht you search Off-Times
@@ -330,6 +463,64 @@ definitions:
       image:
         type: string
         description: Image URL representing the carpool.
+
+  ride2:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier representing a ríde.
+      carpoolId:
+        type: string
+        description: a ride must belong to a carpool
+      date:
+        type: string
+        description: Date of the ride.
+      members:
+        $ref: '#/definitions/membersOfRide'
+
+  membersOfRide:
+    type: array
+    description: List of members and there state at this ride
+    items:
+      $ref: "#/definitions/memberOfRide"
+
+  memberOfRide:
+    type: object
+    description: State of each member of a ride
+    properties:
+      memberId:
+        type: string
+        description: id of the member
+      role:
+        type: string
+        description: |
+          role of the member in this ride.
+
+          possible values are:
+            * driver: member was the driver of this ride
+            * passenger: member joined and was passenger in the car of the driver
+            * allone: member did not join this ride, but drove allone
+            * not:  member did not join this ride
+
+  ride2List:
+    type: array
+    description: List of rides
+    items:
+      $ref: "#/definitions/ride2"
+
+  ride2PageableList:
+    type: object
+    description: Pageable List of rides
+    properties:
+      paging:
+        $ref: "#/definitions/paging"
+      rides:
+        type: array
+        description: List of rides
+        items:
+          $ref: "#/definitions/ride2"
+
   ride:
     type: object
     properties:
