@@ -3,10 +3,10 @@ swagger: '2.0'
 info:
   title: Who drives Next?
   description: |
-  Your API for managing your carpool.
+    Your API for managing your carpool.
 
-  ##Date format
-  Dates are formatted as descibed in [RFC3339](http://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+    ## Date format
+    Dates are formatted as descibed in [RFC3339](http://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14).
 
   version: "0.1.0"
 # the domain of the service
