@@ -9,3 +9,6 @@ Who drives next? Your Carpool Manager.
 and to have some fun!
 
 "Who-drives-next" is an appealing, easy and fun to use application to administer car pooling teams and to answer their every day question: "Who drives next?"
+
+## the API
+the who drives next REST API for managing your carpool: [swagger.yaml](../src/main/ressources/swagger.yaml)
