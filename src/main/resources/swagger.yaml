@@ -2,8 +2,13 @@
 swagger: '2.0'
 info:
   title: Who drives Next?
-  description: Your API for managing your carpool.
-  version: "0.1.0"
+  description: |
+    Your API for managing your carpool.
+
+    ## Date format
+    Dates are formatted as descibed in [RFC3339](http://xml2rfc.ietf.org/public/rfc/html/rfc3339.html#anchor14).
+
+  version: "0.2.0"
 # the domain of the service
 host: api.wdn.binares.de
 # array of all schemes that your API supports
@@ -13,6 +18,12 @@ schemes:
 basePath: /v1
 produces:
   - application/json
+tags:
+  - name: User
+    description: Managing users and identities
+  - name: Carpool
+    description: Managing rarpools, their members and rides
+
 paths:
   /carpools:
     post:
@@ -59,17 +70,13 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/error'
-  /carpools/{carpoolId}/rides:
+
+  /rides:
     post:
       summary: create a ride - a group of people driving together
       description: |
         rides can only be added to existing carpools and can be added by any member of the carpool.
       parameters:
-        - name: carpoolId
-          description: unique ID of the carpool you want to add a ride to
-          in: path
-          type: string
-          required: true
         - name: ride
           in: body
           required: true
@@ -79,7 +86,7 @@ paths:
         - carpool
       responses:
         200:
-          description: the created carpool
+          description: the created ride
           schema:
               $ref: '#/definitions/ride'
         default:
@@ -89,13 +96,21 @@ paths:
     get:
       summary: search for rides
       description: |
-        show the history or search for rides for a carpool.
+        show the history or search for rides.
+        either an userid or a carpoolId is required.
+        rides can only be found by the driver, the passengers or any member of the associated carpool.
       parameters:
         - name: carpoolId
           description: unique ID of the carpool you want to search rides from
-          in: path
+          in: query
           type: string
-          required: true
+          required: false
+        - name: userId
+          in: query
+          description: |
+            search rides where the user was either driver or passenger.
+          required: false
+          type: string
         - name: from
           in: query
           description: |
@@ -134,26 +149,45 @@ paths:
         - carpool
       responses:
         200:
-          description: the created carpool
+          description: the rides
           schema:
-              $ref: '#/definitions/carpool'
+              $ref: '#/definitions/ridePageableList'
         default:
           description: Unexpected error
           schema:
             $ref: '#/definitions/error'
-  /carpools/{carpoolId}/rides/{rideId}/driver:
-    put:
-      summary: set a driver to a ride
-      description: |
-        one driver can be set to a existing ride. If allredy a driver has been set it will be replaced.
 
-        the driver must be one of the members of the carpool.
+
+  /rides/{rideId}:
+    delete:
+      summary: deletes a ride
+      description: |
+        tbd
       parameters:
-        - name: carpoolId
-          description: unique ID of the carpool the ride belongs to
+        - name: rideId
+          description: unique ID of the ride you want to delete
           in: path
           type: string
           required: true
+      tags:
+        - carpool
+      responses:
+        200:
+          description: the ride has been deleted. Empty response.
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/error'
+
+  /rides/{rideId}/driver:
+    put:
+      summary: set a driver to a ride
+      description: |
+        one driver can be set to a existing ride. If allready a driver has been set it will be replaced.
+        A ride allways has to have an driver, though no delete is allowed, only replace via put.
+
+        the driver must be one of the members of the carpool.
+      parameters:
         - name: rideId
           description: unique ID of the ride you want to set the driver to
           in: path
@@ -175,19 +209,16 @@ paths:
           description: Unexpected error
           schema:
             $ref: '#/definitions/error'
-  /carpools/{carpoolId}/rides/{rideId}/passengers:
+  /rides/{rideId}/passengers:
     post:
       summary: add a passenger a ride
       description: |
-        one driver can be set to a existing ride. If allredy a driver has been set it will be replaced.
+        add a list of passengers to the ride. To add more passengers or to delete a passenger the complete list has to be added again. To delete all passengers a empty list can be posted.
 
-        the driver must be one of the members of the carpool.
+        all passengers must be members of the carpool.
+        the driver of a ride can not be a passenger.
+        a user can not be added when having an Off-Time (see #/users/{id}/vavations).
       parameters:
-        - name: carpoolId
-          description: unique ID of the carpool the ride belongs to
-          in: path
-          type: string
-          required: true
         - name: rideId
           description: unique ID of the ride you want to set the passenger to
           in: path
@@ -205,6 +236,78 @@ paths:
           description: the updated ride
           schema:
               $ref: '#/definitions/ride'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/error'
+  /users:
+      get:
+        summary: User Profile
+        description: |
+          The User Profile endpoint returns information about a who-drives-next user.
+
+          The details of the response are depending on the authorisation of the user
+          * any registeres user can see the username, which can be used to identify an user before adding to a carpool.
+          * only users of a carpool can see more details of users who are assigned to the carpool
+        tags:
+          - User
+        responses:
+          200:
+            description: Profile information for a user
+            schema:
+              $ref: '#/definitions/profile'
+          default:
+            description: Unexpected error
+            schema:
+              $ref: '#/definitions/error'
+  /users/{userId}/vacations:
+    post:
+      summary: add a Off-Time to an user
+      description: |
+        An user can define an Off-Time.  This can be used for a GUI to show whether a user is available to join a ride.
+
+        During an Off-Time a user can not be added to a ride neither as a driver nor as a passager.
+      tags:
+        - User
+      parameters:
+        - name: userId
+          description: unique ID of the user you want to add an Off-Time to
+          in: path
+          type: string
+          required: true
+        - name: vacation
+          in: body
+          required: true
+          schema:
+            $ref: "#/definitions/vacationCore"
+
+      responses:
+        200:
+          description: vacation - the newly created Off-Time
+          schema:
+            $ref: '#/definitions/vacation'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/error'
+    get:
+      summary: Off-Times of a user.
+      description: |
+        For a user a list of Off-time periods can be defined.
+        During off times users can not be added to rides.  This eases the creation of new rides.
+      tags:
+        - User
+      parameters:
+        - name: userId
+          description: unique ID of the user for whicht you search Off-Times
+          in: path
+          type: string
+          required: true
+      responses:
+        200:
+          description: List of Off-Time periods.
+          schema:
+            $ref: '#/definitions/vacationList'
         default:
           description: Unexpected error
           schema:
@@ -260,7 +363,7 @@ definitions:
       name:
         type: string
         description: Name of the carpool.
-      display_name:
+      displayName:
         type: string
         description: Display name of carpool.
       capacity:
@@ -269,21 +372,69 @@ definitions:
       image:
         type: string
         description: Image URL representing the carpool.
+
+  membersOfRide:
+    type: array
+    description: List of members and there state at this ride
+    items:
+      $ref: "#/definitions/memberOfRide"
+
+  memberOfRide:
+    type: object
+    description: State of each member of a ride
+    properties:
+      memberId:
+        type: string
+        description: id of the member
+      role:
+        type: string
+        description: |
+          role of the member in this ride.
+
+          possible values are:
+            * driver: member was the driver of this ride
+            * passenger: member joined and was passenger in the car of the driver
+            * allone: member did not join this ride, but drove allone
+            * not:  member did not join this ride
+
   ride:
     type: object
     properties:
       id:
         type: string
         description: Unique identifier representing a ríde.
+      carpoolId:
+        type: string
+        description: a ride must belong to a carpool
       date:
         type: string
-        description: Date of the ride.
+        format: date-time
+        description: Date of the ride.  If not only a date ist set, the time should represent the start time of the ride.
       driver:
         $ref: '#/definitions/driver'
       passengers:
         type: array
         items:
           $ref: '#/definitions/passenger'
+
+  rideList:
+    type: array
+    description: List of rides
+    items:
+      $ref: "#/definitions/ride"
+
+  ridePageableList:
+    type: object
+    description: Pageable List of rides
+    properties:
+      paging:
+        $ref: "#/definitions/paging"
+      rides:
+        type: array
+        description: List of rides
+        items:
+          $ref: "#/definitions/ride"
+
   passenger:
     type: object
     properties:
@@ -292,6 +443,7 @@ definitions:
         description: Unique identifier representing a ríde.
       date:
         type: string
+        format: date
         description: Date of the ride.
   driver:
     type: object
@@ -301,6 +453,7 @@ definitions:
         description: Unique identifier representing a ríde.
       date:
         type: string
+        format: date
         description: Date of the ride.
   member:
     type: object
@@ -314,6 +467,39 @@ definitions:
       nickname:
         type: string
         description: Nickname of Name-Summary of the member.
+# the vacation without the id
+  vacationCore:
+    type: object
+    properties:
+      fromDate:
+        type: string
+        format: date
+        description: First day of the Off-Time
+      toDate:
+        type: string
+        format: date
+        description: Last day of the Off-Time
+
+  vacation:
+    type: object
+    properties:
+      id:
+        type: string
+        description: Unique identifier representing a vacation.
+      fromDate:
+        type: string
+        format: date
+        description: First day of the Off-Time
+      toDate:
+        type: string
+        format: date
+        description: Last day of the Off-Time
+
+  vacationList:
+    type: array
+    description: List of Off-Times
+    items:
+      $ref: "#/definitions/vacation"
   profile:
     type: object
     properties:
@@ -332,12 +518,14 @@ definitions:
       promo_code:
         type: string
         description: Promo code of the user.
+
   Activity:
     type: object
     properties:
       uuid:
         type: string
         description: Unique identifier for the activity
+
   Activities:
     type: object
     properties:
@@ -357,6 +545,7 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/Activity'
+
   error:
     type: object
     properties:
@@ -367,3 +556,14 @@ definitions:
         type: string
       fields:
         type: string
+
+  paging:
+    type: object
+    description: Paging-Objekt
+    properties:
+      total:
+        type: integer
+      limit:
+        type: integer
+      offset:
+        type: integer
