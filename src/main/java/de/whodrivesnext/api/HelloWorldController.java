@@ -77,6 +77,7 @@ public class HelloWorldController
 		catch (Exception eE)
 		{
 			eE.printStackTrace();
+			return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 }
