@@ -53,15 +53,30 @@ public class HelloWorldController
 	@RequestMapping(value = "/helloDatabase", produces = { "application/json" }, method = RequestMethod.GET)
 	public ResponseEntity<String> helloDatabase(@RequestParam(value = "key") String key)
 	{
-		Counter counter = countRepository.findByKey(key);
-
-		if (counter == null)
+		try
 		{
-			counter = new Counter();
-		}
+			System.out.println("1");
+			Counter counter = countRepository.findByKey(key);
+			System.out.println("2");
 
-		counter.setCount(counter.getCount() + 1);
-		countRepository.save(counter);
-		return new ResponseEntity<>("Hello world", HttpStatus.OK);
+			if (counter == null)
+			{
+				counter = new Counter();
+			}
+
+			System.out.println("3");
+
+			counter.setCount(counter.getCount() + 1);
+			System.out.println("4");
+			countRepository.save(counter);
+
+			System.out.println("5");
+
+			return new ResponseEntity<>("Hello world", HttpStatus.OK);
+		}
+		catch (Exception eE)
+		{
+			eE.printStackTrace();
+		}
 	}
 }
