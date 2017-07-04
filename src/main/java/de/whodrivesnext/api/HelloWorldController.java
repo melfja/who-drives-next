@@ -60,13 +60,11 @@ public class HelloWorldController
 			if (counter == null)
 			{
 				counter = new Counter();
+				counter.setKey(key);
 			}
 
 			counter.setCount(counter.getCount() + 1);
-			System.out.println("4");
 			countRepository.save(counter);
-
-			System.out.println("5");
 
 			return new ResponseEntity<>(counter, HttpStatus.OK);
 		}
