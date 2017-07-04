@@ -25,7 +25,7 @@ public class Counter
 
 	private String key;
 
-	private Integer count;
+	private Integer count = 0;
 
 	//~ Constructors -----------------------------------------------------------------------------------------------------------
 

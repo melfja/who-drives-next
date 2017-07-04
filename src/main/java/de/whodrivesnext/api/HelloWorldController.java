@@ -51,20 +51,16 @@ public class HelloWorldController
 	 * @return DOCME
 	 */
 	@RequestMapping(value = "/helloDatabase", produces = { "application/json" }, method = RequestMethod.GET)
-	public ResponseEntity<String> helloDatabase(@RequestParam(value = "key") String key)
+	public ResponseEntity<Counter> helloDatabase(@RequestParam(value = "key") String key)
 	{
 		try
 		{
-			System.out.println("1");
 			Counter counter = countRepository.findByKey(key);
-			System.out.println("2");
 
 			if (counter == null)
 			{
 				counter = new Counter();
 			}
-
-			System.out.println("3");
 
 			counter.setCount(counter.getCount() + 1);
 			System.out.println("4");
@@ -72,12 +68,12 @@ public class HelloWorldController
 
 			System.out.println("5");
 
-			return new ResponseEntity<>("Hello world", HttpStatus.OK);
+			return new ResponseEntity<>(counter, HttpStatus.OK);
 		}
 		catch (Exception eE)
 		{
 			eE.printStackTrace();
-			return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 }
