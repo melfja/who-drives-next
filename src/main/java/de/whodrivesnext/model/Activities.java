@@ -12,7 +12,7 @@ import javax.validation.constraints.*;
 /**
  * Activities
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-06-30T07:51:49.755+02:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2017-07-03T08:08:09.179+02:00")
 
 public class Activities   {
   @JsonProperty("offset")
