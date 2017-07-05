@@ -1,6 +1,6 @@
 //#***************************************************************************
-//# mobilcom IT Entwicklung Source File: SwaggerConfig.java
-//# Copyright (c) 1996-2017 by mobilcom-debitel GmbH
+//# Source File: SwaggerConfig.java
+//# Copyright (c) 1996-2017
 //# All rights reserved.
 //#***************************************************************************
 package de.whodrivesnext.config;

@@ -1,3 +1,8 @@
+//#***************************************************************************
+//# Source File: WhoDrivesNextApplication.java
+//# Copyright (c) 1996-2017
+//# All rights reserved.
+//#***************************************************************************
 package de.whodrivesnext;
 
 import org.springframework.boot.SpringApplication;
