@@ -1,9 +1,10 @@
 //#***************************************************************************
-//# mobilcom IT Entwicklung Source File: HomeController.java
-//# Copyright (c) 1996-2017 by mobilcom-debitel GmbH
+//# Source File: HomeController.java
+//# Copyright (c) 1996-2017
 //# All rights reserved.
 //#***************************************************************************
 package de.whodrivesnext.config;
+
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
