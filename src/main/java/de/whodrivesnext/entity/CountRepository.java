@@ -1,31 +1,26 @@
 //#***************************************************************************
-//# Source File: WhoDrivesNextApplication.java
+//# Source File: CountRepository.java
 //# Copyright (c) 1996-2017
 //# All rights reserved.
 //#***************************************************************************
-package de.whodrivesnext;
+package de.whodrivesnext.entity;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.data.repository.CrudRepository;
 
 
 /********************************************************************
- * DOCME
- *
- * @author frasch
+ * Created by frasch on 30.06.2017.
  */
-@SpringBootApplication
-public class WhoDrivesNextApplication
+public interface CountRepository extends CrudRepository<Counter, Long>
 {
 	//~ Methods ----------------------------------------------------------------------------------------------------------------
 
 	/***************************************
 	 * DOCME
 	 *
-	 * @param args DOCME
+	 * @param  key DOCME
+	 *
+	 * @return DOCME
 	 */
-	public static void main(String[] args)
-	{
-		SpringApplication.run(WhoDrivesNextApplication.class, args);
-	}
+	Counter findByKey(String key);
 }

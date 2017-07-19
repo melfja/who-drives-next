@@ -1,31 +1,31 @@
 //#***************************************************************************
-//# Source File: WhoDrivesNextApplication.java
+//# Source File: HomeController.java
 //# Copyright (c) 1996-2017
 //# All rights reserved.
 //#***************************************************************************
-package de.whodrivesnext;
+package de.whodrivesnext.config;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 
 /********************************************************************
- * DOCME
- *
- * @author frasch
+ * Home redirection to swagger api documentation.
  */
-@SpringBootApplication
-public class WhoDrivesNextApplication
+@Controller
+public class HomeController
 {
 	//~ Methods ----------------------------------------------------------------------------------------------------------------
 
 	/***************************************
-	 * DOCME
+	 * Weiterleitung von "/" auf "/swagger-ui.html".
 	 *
-	 * @param args DOCME
+	 * @return String zur Weiterleitung auf "/swagger-ui.html"
 	 */
-	public static void main(String[] args)
+	@RequestMapping(value = "/")
+	public String index()
 	{
-		SpringApplication.run(WhoDrivesNextApplication.class, args);
+		return "redirect:swagger-ui.html";
 	}
 }
