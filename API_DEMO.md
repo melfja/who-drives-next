@@ -1,6 +1,7 @@
 # API Examples
 
-who-drives-next comes with an API:  [swagger.yaml](./src/main/resources/swagger.yaml)
+who-drives-next comes with an API:
+see [/src/main/resources/swagger.yaml in Swagger UI](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/binaeres/who-drives-next/master/src/main/resources/swagger.yaml)
 
 ## hello World
 ```sh
