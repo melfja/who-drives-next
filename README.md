@@ -12,3 +12,4 @@ and to have some fun!
 
 ## the API
 the who drives next REST API for managing your carpool: [swagger.yaml](./src/main/resources/swagger.yaml)
+see [API DEMO](API_DEMO.md)
